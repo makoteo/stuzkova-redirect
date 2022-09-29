@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+  </head>
+  <body>
+    
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const user = params.get('usr');
+
+        const USERS = ["u", "z"] // ucitel, ziak
+
+        if(user == null || USERS.indexOf(user) == -1){
+            user = "z"; // ASSUME ZIAK if user isn't defined
+        }
+
+        const PAGES = [
+            ["https://orteil.dashnet.org/cookieclicker/", "https://htwins.net/scale2/", "https://theuselessweb.com/"],
+            ["https://www.youtube.com/watch?v=dQw4w9WgXcQ", "https://www.youtube.com/watch?v=IhOXGYdMSFU", "https://drive.google.com/drive/folders/1j0GP9LqGRy3zyIRr2Uqm2a2SfAyIA6Y1?usp=sharing", "https://hmpg.net/", "https://www.youtube.com/watch?v=I9hJ_Rux9y0", ]
+        ]
+
+        const d = new Date();
+        let minutes = d.getMinutes();
+
+        console.log(USERS.indexOf(user), PAGES.length)
+        userpages = Math.min(USERS.indexOf(user), PAGES.length - 1);
+        const url = PAGES[userpages][Math.floor(minutes / Math.ceil(60 / PAGES[userpages].length))];
+
+        console.log(params, user, minutes, userpages, Math.ceil(60 / PAGES[userpages].length), url);
+
+        let par = document.createElement("p");
+        par.innerHTML = "<p>Please follow <a href=" + url + ">this link</a>.</p>";
+        par.setAttribute("hidden", "hidden")
+        document.getElementsByTagName("body")[0].appendChild(par)
+
+        setTimeout(function(){par.removeAttribute("hidden");}, 1500);
+
+        let meta = document.createElement("meta");
+        meta.httpEquiv = "refresh";
+        meta.content = "0; url=" + url;
+        document.getElementsByTagName("head")[0].appendChild(meta);
+    </script>
+  </body>
+</html>
