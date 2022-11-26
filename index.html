@@ -6,7 +6,7 @@
   <body>
     
     <script>
-        const params = new URLSearchParams(window.location.search);
+        /*const params = new URLSearchParams(window.location.search);
         let user = params.get('usr');
 
         const USERS = ["u", "z"] // ucitel, ziak
@@ -28,6 +28,26 @@
         const url = PAGES[userpages][Math.floor(minutes / Math.ceil(60 / PAGES[userpages].length))];
 
         console.log(params, user, minutes, userpages, Math.ceil(60 / PAGES[userpages].length), url);
+
+        let par = document.createElement("p");
+        par.innerHTML = "<p>Please follow <a href=" + url + ">this link</a>.</p>";
+        par.setAttribute("hidden", "hidden")
+        document.getElementsByTagName("body")[0].appendChild(par)
+
+        setTimeout(function(){par.removeAttribute("hidden");}, 1500);
+
+        let meta = document.createElement("meta");
+        meta.httpEquiv = "refresh";
+        meta.content = "0; url=" + url;
+        document.getElementsByTagName("head")[0].appendChild(meta);*/
+
+        const d = new Date();
+        let hours = d.getHours();
+        let minutes = d.getMinutes();
+
+        console.log(hours, minutes)
+
+        const url = (hours == 4 && minutes == 20) ? "https://drive.google.com/file/d/1edK-mQAddlr0uS_JXjX5h8QPkqk0tqh2/view?usp=sharing" : "https://drive.google.com/drive/folders/1JGFlrYURDuNDspROxHex7atjunnpnMwz";
 
         let par = document.createElement("p");
         par.innerHTML = "<p>Please follow <a href=" + url + ">this link</a>.</p>";
