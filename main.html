@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Fotky objektivne najlepsej triedy</title> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="style.css" type="text/css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="demo-bg"></div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <img id="large-img">
+        </div>
+        <a class="Back" onclick="plusSlides(-1)"><i class="arrow left"></i></a>
+        <a class="forward" onclick="plusSlides(1)"><i class="arrow right"></i></a>
+    </div>
+
+    <header>
+        <h1>OKTÁVA FOTEČKY</h1>
+	</header>
+
+    <main>
+
+        <section id="galeria">
+            <div class="img-box" id="img-box">
+                
+            </div>
+        </section>
+        
+    </main>
+
+    <script>
+    // Main image list
+    var IMAGEARRAY = [];
+    // Number of loaded images
+    var NOLOADED = 0;
+
+    var LOADING = false;
+
+    var image_items = [];
+
+    var modal = document.getElementById("myModal");
+
+    var OPENEDIMAGE = "";
+
+    function plusSlides(n) {
+        console.log(IMAGEARRAY.indexOf(OPENEDIMAGE))
+        resource_image(IMAGEARRAY[Math.min(IMAGEARRAY.length, Math.max(0, IMAGEARRAY.indexOf(OPENEDIMAGE) + n))]);
+    }
+
+    function resource_image(link){
+        
+        document.getElementById("large-img").src = "https://drive.google.com/thumbnail?authuser=0&sz=w1600&id=" + link;
+        OPENEDIMAGE = link;
+    }
+
+    function push_images(amount){
+        for(var i = 0; i < amount; i++){
+
+            if (NOLOADED + i >= IMAGEARRAY.length){
+                break;
+            }
+
+            var tmp_img = document.createElement("img");
+            var source = IMAGEARRAY[NOLOADED + i];
+
+            //tmp_img.src = "https://drive.google.com/uc?export=view&id=" + source;
+
+            // the following returns a thumbnail version of the image, so we don't use too much data
+            tmp_img.src = "https://drive.google.com/thumbnail?authuser=0&sz=w512&id=" + source;
+            tmp_img.classList.add("image-holder");
+            tmp_img.name = source;
+
+            document.getElementById("img-box").appendChild(tmp_img);
+        }
+        NOLOADED+=amount;
+
+        // Update image_items
+        image_items = document.querySelectorAll(".image-holder");
+
+        
+        console.log(image_items);
+
+        // Update the event listeners
+        for(var img in image_items){
+            image_items[img].onclick = function() {
+                modal.style.display = "block";
+                resource_image(this.getAttribute("name"));
+            }
+        }
+    }
+
+    // Initially load images into array
+    fetch('https://api.codetabs.com/v1/proxy?quest=drive.google.com/embeddedfolderview?id=1WQQkHEzolifw2y06jcWth5nYEf4_hF-d')
+    .then(
+        function(response) {
+        if (response.status !== 200) {
+            console.log('Looks like there was a problem. Status Code: ' +
+            response.status);
+            console.log(response);
+            return;
+        }
+
+        // Examine the text in the response
+        response.text().then(function(data) {
+            // convert the response to a HTML object so we can use getElements
+            var htmlObject = document.createElement('html');
+            htmlObject.innerHTML = data;
+            links = htmlObject.getElementsByTagName("a");
+            // Push all the links into the main array
+            for(var i=0; i<links.length; i++) {
+
+                src = links[i].href;
+                // Split the url at the slashes so we can get the id
+                var indices = [];
+                for(var j=0; j<src.length;j++) {
+                    if (src[j] === "/") indices.push(j);
+                }
+
+                src = src.slice(indices[indices.length-2] + 1, indices[indices.length-1]);
+
+                console.log(src);
+
+                IMAGEARRAY.push(src);
+            }
+        
+            // 
+            push_images(9);
+        });
+        }
+    )
+    .catch(function(err) {
+        console.log('Fetch Error :-S', err);
+    });
+    window.onscroll = function(ev) {
+        if (!LOADING && (window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+            push_images(12);
+            LOADING = true;
+            setTimeout(function(){LOADING = false}, 1000);
+        }
+    };
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == document.getElementsByClassName("modal-content")[0]) {
+            modal.style.display = "none";
+            OPENEDIMAGE = "";
+        }
+    }
+    </script>
+</body>
+
+</html>
