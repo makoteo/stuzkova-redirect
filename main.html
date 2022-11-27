@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Fotky objektivne najlepsej triedy</title> 
+    <title>Fotky Objektívne Najlepšej Triedy</title> 
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,25 +68,27 @@
     }
 
     function push_images(amount){
+        var SAVEDNOLOADED = NOLOADED;
         for(var i = 0; i < amount; i++){
 
-            if (NOLOADED + i >= IMAGEARRAY.length){
+            if (SAVEDNOLOADED + i >= IMAGEARRAY.length){
+                console.log("Error?");
                 break;
             }
 
             var tmp_img = document.createElement("img");
-            var source = IMAGEARRAY[NOLOADED + i];
+            var source = IMAGEARRAY[SAVEDNOLOADED + i];
 
             //tmp_img.src = "https://drive.google.com/uc?export=view&id=" + source;
 
             // the following returns a thumbnail version of the image, so we don't use too much data
-            tmp_img.src = "https://drive.google.com/thumbnail?authuser=0&sz=w512&id=" + source;
+            tmp_img.src = "https://drive.google.com/thumbnail?authuser=0&sz=w640&id=" + source;
             tmp_img.classList.add("image-holder");
             tmp_img.name = source;
 
             document.getElementById("img-box").appendChild(tmp_img);
+            NOLOADED++;
         }
-        NOLOADED+=amount;
 
         // Update image_items
         image_items = document.querySelectorAll(".image-holder");
@@ -101,6 +103,24 @@
                 resource_image(this.getAttribute("name"));
             }
         }
+    }
+
+    function shuffle(array) {
+        let currentIndex = array.length,  randomIndex;
+
+        // While there remain elements to shuffle.
+        while (currentIndex != 0) {
+
+            // Pick a remaining element.
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+        }
+
+        return array;
     }
 
     // Initially load images into array
@@ -136,9 +156,11 @@
 
                 IMAGEARRAY.push(src);
             }
-        
-            // 
+
+            IMAGEARRAY = shuffle(IMAGEARRAY);
             push_images(9);
+        
+            setTimeout(function(){push_images(9)}, 800);
         });
         }
     )
@@ -146,10 +168,10 @@
         console.log('Fetch Error :-S', err);
     });
     window.onscroll = function(ev) {
-        if (!LOADING && (window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+        if (!LOADING && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
             push_images(12);
             LOADING = true;
-            setTimeout(function(){LOADING = false}, 1000);
+            setTimeout(function(){LOADING = false}, 800);
         }
     };
 
