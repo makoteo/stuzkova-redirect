@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
 
     <link rel="stylesheet" href="style.css" type="text/css">
 
@@ -19,17 +19,24 @@
 <body>
     <div class="demo-bg"></div>
 
+    <a id="drive-icon" class="main-drive-icon" href="https://drive.google.com/drive/folders/1WQQkHEzolifw2y06jcWth5nYEf4_hF-d"><i class="lab la-google-drive"></i></a>
+
     <!-- The Modal -->
     <div id="myModal" class="modal">
         <div class="modal-content">
             <img id="large-img">
+            <iframe id="large-vid" src=""></iframe>
         </div>
+
+        <a onclick="closeMain()" class="close"></a>
+
         <a class="Back" onclick="plusSlides(-1)"><i class="arrow left"></i></a>
         <a class="forward" onclick="plusSlides(1)"><i class="arrow right"></i></a>
     </div>
 
     <header>
         <h1>OKTÁVA FOTEČKY</h1>
+        <h6 id="loading-text">Loading...</h6>
 	</header>
 
     <main>
@@ -45,25 +52,65 @@
     <script>
     // Main image list
     var IMAGEARRAY = [];
+
     // Number of loaded images
     var NOLOADED = 0;
 
-    var LOADING = false;
-
-    var image_items = [];
+    // Loading boolean so that we don't load too many images at once
+    // Starts at true so that scrolling doesn't affect anything until after initial download
+    var LOADING = true;
 
     var modal = document.getElementById("myModal");
+
+    var bgImg = new Image();
+    bgImg.onload = function(){
+        document.getElementsByClassName("demo-bg")[0].style.backgroundImage = 'url(' + bgImg.src + ')';
+        start_main_loader();
+    };
+    bgImg.src = 'https://drive.google.com/thumbnail?authuser=0&sz=w1800&id=18NZGt8t8tbaFysTV_NqvP7Ax97YN5nvG';
 
     var OPENEDIMAGE = "";
 
     function plusSlides(n) {
-        console.log(IMAGEARRAY.indexOf(OPENEDIMAGE))
-        resource_image(IMAGEARRAY[Math.min(IMAGEARRAY.length, Math.max(0, IMAGEARRAY.indexOf(OPENEDIMAGE) + n))]);
+        var index_array = [];
+        for(i in IMAGEARRAY){
+            index_array.push(IMAGEARRAY[i][0]);
+        }
+
+        console.log(index_array.indexOf(OPENEDIMAGE));
+        resource_image(IMAGEARRAY[Math.min(IMAGEARRAY.length, Math.max(0, index_array.indexOf(OPENEDIMAGE) + n))][0]);
+    }
+
+    function closeMain(){
+        modal.classList.remove("modal-visible");
+        document.getElementById("large-img").src = "";
+        document.getElementById("large-vid").src = "";
+        OPENEDIMAGE = "";
     }
 
     function resource_image(link){
-        
-        document.getElementById("large-img").src = "https://drive.google.com/thumbnail?authuser=0&sz=w1600&id=" + link;
+        // Check if link is a video:
+        video = false;
+        for(p in IMAGEARRAY){
+            if(IMAGEARRAY[p][0] == link){
+                if(IMAGEARRAY[p][1] == true){
+                    video = true;
+                }
+                break;
+            }
+        }
+
+        if(video){
+            document.getElementById("large-vid").removeAttribute('hidden');
+            document.getElementById("large-img").setAttribute('hidden', 'hidden');
+            document.getElementById("large-vid").src = "https://drive.google.com/file/d/" + link + "/preview";
+            document.getElementById("large-img").src = "";
+        }else{
+            document.getElementById("large-img").removeAttribute('hidden');
+            document.getElementById("large-vid").setAttribute('hidden', 'hidden');
+            document.getElementById("large-img").src = "https://drive.google.com/thumbnail?authuser=0&sz=w1600&id=" + link;
+            document.getElementById("large-vid").src = "";
+        }
         OPENEDIMAGE = link;
     }
 
@@ -77,7 +124,7 @@
             }
 
             var tmp_img = document.createElement("img");
-            var source = IMAGEARRAY[SAVEDNOLOADED + i];
+            var source = IMAGEARRAY[SAVEDNOLOADED + i][0];
 
             //tmp_img.src = "https://drive.google.com/uc?export=view&id=" + source;
 
@@ -86,20 +133,30 @@
             tmp_img.classList.add("image-holder");
             tmp_img.name = source;
 
-            document.getElementById("img-box").appendChild(tmp_img);
+            var cont = document.createElement("div");
+            cont.style.position = 'relative';
+            
+            cont.appendChild(tmp_img);
+            // add a video tag
+            if(IMAGEARRAY[SAVEDNOLOADED + i][1] == true){
+                var tag = document.createElement("i");
+                tag.classList.add("las");
+                tag.classList.add("la-video");
+                tag.classList.add("floating-tag");
+                cont.appendChild(tag);
+            }
+
+            document.getElementById("img-box").appendChild(cont);
             NOLOADED++;
         }
 
         // Update image_items
-        image_items = document.querySelectorAll(".image-holder");
-
-        
-        console.log(image_items);
+        var image_items = document.querySelectorAll(".image-holder");
 
         // Update the event listeners
         for(var img in image_items){
             image_items[img].onclick = function() {
-                modal.style.display = "block";
+                modal.classList.add("modal-visible");
                 resource_image(this.getAttribute("name"));
             }
         }
@@ -124,62 +181,82 @@
     }
 
     // Initially load images into array
-    fetch('https://api.codetabs.com/v1/proxy?quest=drive.google.com/embeddedfolderview?id=1WQQkHEzolifw2y06jcWth5nYEf4_hF-d')
-    .then(
-        function(response) {
-        if (response.status !== 200) {
-            console.log('Looks like there was a problem. Status Code: ' +
-            response.status);
-            console.log(response);
-            return;
-        }
-
-        // Examine the text in the response
-        response.text().then(function(data) {
-            // convert the response to a HTML object so we can use getElements
-            var htmlObject = document.createElement('html');
-            htmlObject.innerHTML = data;
-            links = htmlObject.getElementsByTagName("a");
-            // Push all the links into the main array
-            for(var i=0; i<links.length; i++) {
-
-                src = links[i].href;
-                // Split the url at the slashes so we can get the id
-                var indices = [];
-                for(var j=0; j<src.length;j++) {
-                    if (src[j] === "/") indices.push(j);
-                }
-
-                src = src.slice(indices[indices.length-2] + 1, indices[indices.length-1]);
-
-                console.log(src);
-
-                IMAGEARRAY.push(src);
+    function start_main_loader(){
+        console.log("Main loader start");
+        fetch('https://api.codetabs.com/v1/proxy?quest=drive.google.com/embeddedfolderview?id=1WQQkHEzolifw2y06jcWth5nYEf4_hF-d#list')
+        .then(
+            function(response) {
+            if (response.status !== 200) {
+                console.log('Looks like there was a problem. Status Code: ' +
+                response.status);
+                document.getElementById("loading-text").innerHTML = "Cannot load, try again later.";
+                console.log(response);
+                return;
             }
 
-            IMAGEARRAY = shuffle(IMAGEARRAY);
-            push_images(9);
-        
-            setTimeout(function(){push_images(9)}, 800);
+            // Examine the text in the response
+            response.text().then(function(data) {
+                // convert the response to a HTML object so we can use getElements
+                var htmlObject = document.createElement('html');
+                htmlObject.innerHTML = data;
+                links = htmlObject.getElementsByTagName("a");
+                // Push all the links into the main array
+                for(var i=0; i<links.length; i++) {
+
+                    src = links[i].href;
+                    // Split the url at the slashes so we can get the id
+                    var indices = [];
+                    for(var j=0; j<src.length;j++) {
+                        if (src[j] === "/") indices.push(j);
+                    }
+
+                    src = src.slice(indices[indices.length-2] + 1, indices[indices.length-1]);
+
+                    var video = false;
+                    var title = links[i].querySelectorAll(".flip-entry-title");
+                    if (title.length > 0) {
+                        video = title[0].innerHTML.toUpperCase().includes(".MP4") || title[0].innerHTML.toUpperCase().includes(".MOV");
+                    }
+
+                    console.log(src);
+
+                    IMAGEARRAY.push([src, video]);
+                }
+
+                IMAGEARRAY = shuffle(IMAGEARRAY);
+
+                LOADING = false;
+
+                push_images(9);
+                document.getElementById("loading-text").innerHTML = "";
+            
+                setTimeout(function(){push_images(9)}, 800);
+            });
+            }
+        )
+        .catch(function(err) {
+            console.log('Fetch Error :-S', err);
         });
-        }
-    )
-    .catch(function(err) {
-        console.log('Fetch Error :-S', err);
-    });
+    }
+    
     window.onscroll = function(ev) {
         if (!LOADING && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
             push_images(12);
             LOADING = true;
             setTimeout(function(){LOADING = false}, 800);
         }
+
+        if(window.scrollY > window.innerHeight/2){
+            document.getElementById("drive-icon").classList.add("off-page");
+        }else{
+            document.getElementById("drive-icon").classList.remove("off-page");
+        }
     };
 
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
         if (event.target == document.getElementsByClassName("modal-content")[0]) {
-            modal.style.display = "none";
-            OPENEDIMAGE = "";
+            closeMain();
         }
     }
     </script>
