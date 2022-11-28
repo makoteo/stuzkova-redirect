@@ -54,7 +54,7 @@
     </video>
 
     <p id="text">
-        Click anywhere...
+        Loading...
     </p>
 </html>
 
@@ -63,6 +63,7 @@
     var video3 = document.getElementById('video3');
     video.onloadeddata = function() {
         video3.onloadeddata = function(){
+            document.getElementById("text").innerHTML = "Click anywhere.";
             document.addEventListener('click', function() {
                 video.removeAttribute("hidden");
                 video3.removeAttribute("hidden");

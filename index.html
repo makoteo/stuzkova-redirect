@@ -47,10 +47,11 @@
 
         console.log(hours, minutes)
 
-        const url = (hours == 4 && minutes == 20) ? "https://drive.google.com/file/d/1edK-mQAddlr0uS_JXjX5h8QPkqk0tqh2/view?usp=sharing" : "https://drive.google.com/drive/folders/1JGFlrYURDuNDspROxHex7atjunnpnMwz";
+        // const url = (hours == 4 && minutes == 20) ? "https://drive.google.com/file/d/1edK-mQAddlr0uS_JXjX5h8QPkqk0tqh2/view?usp=sharing" : "https://drive.google.com/drive/folders/1JGFlrYURDuNDspROxHex7atjunnpnMwz";
+        const url = (hours == 4 && minutes == 20) ? "dudy.html" : "main.html";
 
         let par = document.createElement("p");
-        par.innerHTML = "<p>Please follow <a href=" + url + ">this link</a>.</p>";
+        par.innerHTML = "<p>Prosím kliknite na <a href=" + url + ">tento link</a>.</p>";
         par.setAttribute("hidden", "hidden")
         document.getElementsByTagName("body")[0].appendChild(par)
 
